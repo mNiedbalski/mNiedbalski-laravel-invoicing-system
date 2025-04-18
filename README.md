@@ -1,7 +1,16 @@
 ## mNiedbalski additions:
 
+Instead of using integer type for prices, I have decided to introduce a new class called `Money` to handle monetary values.
+This solution is more robust and allows for better handling of currency-related operations, such as formatting and arithmetic.
+
 I've decided to add ramsey/uuid library for UUID generation, as it is a widely used library for this purpose in PHP.
 It is better to use a library that is well-tested and widely adopted rather than implementing a custom solution.
+
+I have also decided to add taxRate and discountRate fields to the ProductLine class, as these are common fields in invoice systems.
+They won't be interfering with core functionality, but they will allow for more flexibility in the future.
+Following those changes, I've added additional methods in Invoice class that return taxed, discounted and taxed+discounted amounts.
+
+Following DDD principles, I have decided to create a separate class for the Customer entity.
 
 ## Invoice Structure:
 

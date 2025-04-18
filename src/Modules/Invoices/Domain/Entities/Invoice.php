@@ -2,10 +2,26 @@
 
 namespace Modules\Invoices\Domain\Entities;
 
+use DateTimeImmutable;
 use Modules\Invoices\Domain\Enums\StatusEnum;
 use Modules\Invoices\Domain\ValueObjects\InvoiceId;
 use Modules\Invoices\Domain\ValueObjects\Money;
 
+/**
+ * Class Invoice
+ *
+ * Represents an invoice in the system.
+ *
+ * <p>At first I have added methods responsible for adding product lines and removing then, but then I realized that since it is Invoice,
+ * productLines array should be immutable; So I have commented them out.
+ * </p>
+ *
+ * @property InvoiceId $id
+ * @property StatusEnum $status
+ * @property Customer $customer
+ * @property array $productLines
+ * @property Money $totalPrice
+ */
 class Invoice
 {
     private InvoiceId $id;
@@ -20,10 +36,15 @@ class Invoice
      * @param Customer $customer
      * @param array $productLines
      */
-    public function __construct(InvoiceId $id, StatusEnum $status, Customer $customer, array $productLines = [])
+    public function __construct(
+        InvoiceId $id,
+        StatusEnum $status,
+        Customer $customer,
+        array $productLines = [],
+    )
     {
         $this->id = $id;
-        $this->status = StatusEnum::Draft;
+        $this->status = $status;
         $this->customer = $customer;
         $this->productLines = $productLines;
         $this->calculateTotalPrice();
@@ -36,22 +57,84 @@ class Invoice
             $this->totalPrice = $this->totalPrice->add($productLine->getTotalUnitPrice());
         }
     }
-    public function addProductLine(ProductLine $productLine): void
-    {
-        $this->productLines[] = $productLine;
-        $this->totalPrice = $this->totalPrice->add($productLine->getTotalUnitPrice());
-    }
-    public function removeProductLine(ProductLine $productLine): void
-    {
-        $this->productLines = array_filter(
-            $this->productLines,
-            fn($line) => $line !== $productLine
-        );
 
-        $this->totalPrice = $this->totalPrice->subtract($productLine->getTotalUnitPrice());
+
+    // OPTIONAL EXPANSION
+    /**
+     * Tax is calculated on each of the product line items, because tax might differ between different products.
+     * @return Money
+     */
+    public function getTotalTaxedAmount(): Money
+    {
+        $totalTaxedAmount = new Money(0); // Initialize with zero
+
+        /** @var ProductLine $productLine */
+        foreach ($this->productLines as $productLine) {
+            $totalTaxedAmount = $totalTaxedAmount->add($productLine->getTotalTaxedAmount());
+        }
+        return $totalTaxedAmount;
     }
+
+    /**
+     * Discount is calculated on each of the product line items, because discount might differ between different products.
+     * @return Money
+     */
+    public function getTotalDiscountedAmount(): Money
+    {
+        $totalDiscountedAmount = new Money(0); // Initialize with zero
+
+        /** @var ProductLine $productLine */
+        foreach ($this->productLines as $productLine) {
+            $totalDiscountedAmount = $totalDiscountedAmount->add($productLine->getTotalDiscountedAmount());
+        }
+        return $totalDiscountedAmount;
+    }
+
+    /**
+     * Tax and discount are calculated on each of the product line items, because they might differ between different products.
+     * @return Money
+     */
+    public function getTotalTaxedAndDiscountedAmount(): Money
+    {
+        $totalTaxedAndDiscountedAmount = new Money(0); // Initialize with zero
+
+        /** @var ProductLine $productLine */
+        foreach ($this->productLines as $productLine) {
+            $totalTaxedAndDiscountedAmount = $totalTaxedAndDiscountedAmount->add($productLine->getTotalDiscountedAndTaxedAmount());
+        }
+        return $totalTaxedAndDiscountedAmount;
+    }
+    // END OF OPTIONAL EXPANSION
+
+//    //Commented out intentionally.
+//    public function addProductLine(ProductLine $productLine): void
+//    {
+//        $this->productLines[] = $productLine;
+//        $this->totalPrice = $this->totalPrice->add($productLine->getTotalUnitPrice());
+//        $this->updatedAt = new DateTimeImmutable();
+//    }
+//    public function removeProductLine(ProductLine $productLine): void
+//    {
+//        $this->productLines = array_filter(
+//            $this->productLines,
+//            fn($line) => $line !== $productLine
+//        );
+//
+//        $this->totalPrice = $this->totalPrice->subtract($productLine->getTotalUnitPrice());
+//        $this->updatedAt = new DateTimeImmutable();
+//    }
+
 
     // Getters and setters
+
+    public function getId(): InvoiceId
+    {
+        return $this->id;
+    }
+    public function getCustomer(): Customer
+    {
+        return $this->customer;
+    }
     public function getStatus(): StatusEnum
     {
         return $this->status;
@@ -65,4 +148,6 @@ class Invoice
     {
         return $this->totalPrice;
     }
+
+
 }
