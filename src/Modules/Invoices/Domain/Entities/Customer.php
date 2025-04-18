@@ -2,6 +2,9 @@
 
 namespace Modules\Invoices\Domain\Entities;
 
+use Modules\Invoices\Domain\ValueObjects\IdService;
+use Ramsey\Uuid\Uuid;
+
 class Customer
 {
     private string $id; // string because UUID
@@ -13,13 +16,13 @@ class Customer
      * @param string $name
      * @param string $email
      */
-    public function __construct(string $id, string $name, string $email)
+    public function __construct(string $name, string $email, ?string $id = null )
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Invalid email format.');
         }
 
-        $this->id = $id;
+        $this->id = $id ?? IdService::generate();
         $this->name = $name;
         $this->email = $email;
     }

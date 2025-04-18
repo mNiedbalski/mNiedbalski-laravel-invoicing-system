@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Invoices\Infrastructure\Controllers\InvoiceController;
 
 Route::get('/', static function () {
-    return 'Ingenious BE interview task. Please refer to the README.md file for more information.';
+    return view('task-page');
 });
+Route::post('/invoices', [InvoiceController::class, 'createInvoice']);

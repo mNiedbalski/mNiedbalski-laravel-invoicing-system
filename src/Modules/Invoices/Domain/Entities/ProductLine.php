@@ -2,7 +2,9 @@
 
 namespace Modules\Invoices\Domain\Entities;
 
+use Modules\Invoices\Domain\ValueObjects\IdService;
 use Modules\Invoices\Domain\ValueObjects\Money;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class ProductLine
@@ -28,7 +30,7 @@ class ProductLine
     private float $discountRate = 0.0;
 
 
-    public function __construct(string $id, string $name, int $quantity, Money $unitPrice, float $taxRate = 0.0, float $discountRate = 0.0)
+    public function __construct(string $name, int $quantity, Money $unitPrice, float $taxRate = 0.0, float $discountRate = 0.0, ?string $id = null )
     {
         //optional expansion
         if ($taxRate < 0 || $taxRate > 100) {
@@ -40,7 +42,7 @@ class ProductLine
         }
         //end of optional expansion
 
-        $this->id = $id;
+        $this->id = $id ?? IdService::generate();
         $this->name = $name;
         $this->quantity = $quantity;
         $this->unitPrice = $unitPrice;

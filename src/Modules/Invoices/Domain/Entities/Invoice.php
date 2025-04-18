@@ -4,7 +4,7 @@ namespace Modules\Invoices\Domain\Entities;
 
 use DateTimeImmutable;
 use Modules\Invoices\Domain\Enums\StatusEnum;
-use Modules\Invoices\Domain\ValueObjects\InvoiceId;
+use Modules\Invoices\Domain\ValueObjects\IdService;
 use Modules\Invoices\Domain\ValueObjects\Money;
 
 /**
@@ -16,7 +16,7 @@ use Modules\Invoices\Domain\ValueObjects\Money;
  * productLines array should be immutable; So I have commented them out.
  * </p>
  *
- * @property InvoiceId $id
+ * @property string $id
  * @property StatusEnum $status
  * @property Customer $customer
  * @property array $productLines
@@ -24,26 +24,26 @@ use Modules\Invoices\Domain\ValueObjects\Money;
  */
 class Invoice
 {
-    private InvoiceId $id;
+    private string $id;
     private StatusEnum $status;
     private Customer $customer;
     private array $productLines = [];
     private Money $totalPrice;
 
     /** Constructor that creates invoice object.
-     * @param InvoiceId $id
+     * @param IdService $id
      * @param StatusEnum $status
      * @param Customer $customer
      * @param array $productLines
      */
     public function __construct(
-        InvoiceId $id,
+        ?string $id,
         StatusEnum $status,
-        Customer $customer,
-        array $productLines = [],
+        Customer   $customer,
+        array      $productLines = [],
     )
     {
-        $this->id = $id;
+        $this->id = $id ?? IdService::generate();
         $this->status = $status;
         $this->customer = $customer;
         $this->productLines = $productLines;
@@ -127,7 +127,7 @@ class Invoice
 
     // Getters and setters
 
-    public function getId(): InvoiceId
+    public function getId(): IdService
     {
         return $this->id;
     }
