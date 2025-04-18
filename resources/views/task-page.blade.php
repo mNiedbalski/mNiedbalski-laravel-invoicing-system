@@ -37,7 +37,10 @@
 <body>
 <h1>Required endpoints</h1>
 <button onclick="location.href='{{ url('/invoices/view') }}'">View Invoice</button>
-<button onclick="location.href='{{ url('/invoices/create') }}'">Create Invoice</button>
+<form action="{{ url('api/invoices/create') }}" method="POST">
+    @csrf
+    <button type="submit">Create Invoice</button>
+</form>
 <button onclick="location.href='{{ url('/invoices/send') }}'">Send Invoice</button>
 </body>
 </html>

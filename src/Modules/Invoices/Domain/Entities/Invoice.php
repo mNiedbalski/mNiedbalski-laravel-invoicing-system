@@ -31,7 +31,7 @@ class Invoice
     private Money $totalPrice;
 
     /** Constructor that creates invoice object.
-     * @param IdService $id
+     * @param string $id
      * @param StatusEnum $status
      * @param Customer $customer
      * @param array $productLines
@@ -126,8 +126,11 @@ class Invoice
 
 
     // Getters and setters
-
-    public function getId(): IdService
+    public function getProductLines(): array
+    {
+        return $this->productLines;
+    }
+    public function getId(): string
     {
         return $this->id;
     }
