@@ -2,9 +2,10 @@
 
 namespace Modules\Invoices\Infrastructure\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Modules\Invoices\Application\Services\SendInvoiceNotification;
+use Modules\Invoices\Application\Services\InvoiceNotificationService;
 use Modules\Invoices\Domain\Entities\Customer;
 use Modules\Invoices\Domain\Entities\Invoice;
 use Modules\Invoices\Domain\Entities\ProductLine;
@@ -18,7 +19,7 @@ use Modules\Notifications\Application\Facades\NotificationFacade;
 class InvoiceController
 {
     public function __construct(
-        private readonly InvoiceAdapter $invoiceAdapter
+        private readonly InvoiceAdapter $invoiceAdapter,
     )
     {
     }
@@ -65,11 +66,11 @@ class InvoiceController
         return view('invoices.view', ['invoice' => $invoice]);
     }
 
-    public function sendInvoice(Request $request)
+    public function sendInvoice(Request $request): JsonResponse
     {
+        $invoiceNotificationService = app(InvoiceNotificationService::class);
         $id = $request->input('id');
         $invoice = $this->invoiceAdapter->fromId($id);
-
         if (!$invoice) {
             return response()->json(['error' => 'Invoice not found'], 404);
         }
@@ -86,12 +87,12 @@ class InvoiceController
         }
 
         // Send notification using SendInvoiceNotification service (I've created my own service to encapsulate the logic of sending invoice notifications)
-        $sendInvoiceNotification = app(SendInvoiceNotification::class);
-        $sendInvoiceNotification->execute($invoice);
-
+//        $sendInvoiceNotification = app(SendInvoiceNotification::class);
         $invoice->setStatus(StatusEnum::Sending);
-        $this->invoiceAdapter->persist($invoice);
+        $invoiceNotificationService->execute($invoice);
 
+        $this->invoiceAdapter->persist($invoice);
+        dump($invoice);
         return response()->json(['message' => 'Invoice is being sent'], 200);
     }
 

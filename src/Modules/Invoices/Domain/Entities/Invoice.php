@@ -151,7 +151,7 @@ class Invoice
             StatusEnum::Draft->value => [StatusEnum::Sending->value],
             StatusEnum::Sending->value => [StatusEnum::SentToClient->value],
         ];
-        if (!isset($validTransitions[$this->status->value]) || !in_array($status, $validTransitions[$this->status->value])) {
+        if (!isset($validTransitions[$this->status->value]) || !in_array($status->value, $validTransitions[$this->status->value])) {
             throw new \InvalidArgumentException('Invalid status transition');
         }
 

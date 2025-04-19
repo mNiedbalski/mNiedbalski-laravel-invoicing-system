@@ -7,4 +7,4 @@ use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/../src/Modules/Notifications/Presentation/routes.php';
 
-Route::get('/invoices', [InvoiceController::class, 'viewInvoice'])->name('invoices.view');
+

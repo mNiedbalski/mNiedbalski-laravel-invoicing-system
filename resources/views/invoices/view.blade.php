@@ -103,6 +103,11 @@
         </div>
 
         <p class="total-price"><strong>Total Price:</strong> {{ number_format($invoice->getTotalPrice()->getAmount() / 100, 2) }} {{ $invoice->getTotalPrice()->getCurrency() }}</p>
+        <form action="{{ route('invoices.send') }}" method="POST">
+            @csrf
+            <input type="hidden" name="id" value="{{ $invoice->getId() }}">
+            <button type="submit">Send Invoice</button>
+        </form>
     @endif
 </div>
 </body>

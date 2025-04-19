@@ -18,6 +18,7 @@ class UpdateInvoiceStatusListener
 
         if ($invoice && $invoice->getStatus() === StatusEnum::Sending) {
             $invoice->setStatus(StatusEnum::SentToClient);
+            dd($invoice);
             $this->invoiceAdapter->persist($invoice);
         }
     }

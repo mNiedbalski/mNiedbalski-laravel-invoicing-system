@@ -9,12 +9,8 @@ use Modules\Notifications\Api\Dtos\NotifyData;
 use Modules\Notifications\Application\Facades\NotificationFacade;
 use Ramsey\Uuid\Uuid;
 
-final class SendInvoiceNotification
+final class InvoiceNotificationService
 {
-    public function __construct(
-        private readonly NotificationFacade $notificationFacade,
-    ) {}
-
     public function execute(Invoice $invoice): void
     {
         $customer = $invoice->getCustomer();
@@ -25,8 +21,9 @@ final class SendInvoiceNotification
             subject: 'Invoice Details - ' . $invoice->getId(),
             message: $this->buildMessage($invoice),
         );
-
-        $this->notificationFacade->notify($notifyData);
+        dd($notifyData);
+        $notificationFacade = app(NotificationFacade::class);
+        $notificationFacade->notify($notifyData);
     }
 
     private function buildMessage(Invoice $invoice): string
