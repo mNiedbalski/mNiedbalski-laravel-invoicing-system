@@ -10,7 +10,7 @@ class InMemoryInvoiceRepository
 
     public function save(Invoice $invoice): void
     {
-        $this->invoices[$invoice->getId()->getId()] = $invoice;
+        $this->invoices[$invoice->getId()] = $invoice;
     }
 
     public function findById(string $id): ?Invoice

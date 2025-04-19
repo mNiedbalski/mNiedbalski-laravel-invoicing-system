@@ -1,9 +1,10 @@
 <?php
 
 declare(strict_types=1);
+
 use Modules\Invoices\Infrastructure\Controllers\InvoiceController;
 use Illuminate\Support\Facades\Route;
+
 require __DIR__.'/../src/Modules/Notifications/Presentation/routes.php';
 
-
-Route::post('/invoices/create', [InvoiceController::class, 'createInvoice']);
+Route::get('/invoices', [InvoiceController::class, 'viewInvoice'])->name('invoices.view');

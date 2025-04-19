@@ -12,6 +12,13 @@ Following those changes, I've added additional methods in Invoice class that ret
 
 Following DDD principles, I have decided to create a separate class for the Customer entity.
 
+
+### Some errors:
+I've encountered errors connected with storing invoices in memory.
+Those lines solved problem:
+`chmod -R guo+w storage
+php artisan cache:clear`
+
 ## Invoice Structure:
 
 The invoice should contain the following fields:

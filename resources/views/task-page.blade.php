@@ -35,12 +35,28 @@
     </style>
 </head>
 <body>
+@if (session('success'))
+    <div style="color: green; margin-bottom: 20px;">
+        {{ session('success') }}
+    </div>
+@endif
 <h1>Required endpoints</h1>
-<button onclick="location.href='{{ url('/invoices/view') }}'">View Invoice</button>
-<form action="{{ url('api/invoices/create') }}" method="POST">
+
+<form action="{{ route('invoices.view') }}" method="GET">
+    <input
+        type="text"
+        name="id"
+        required
+        placeholder="Invoice ID..."
+    >
+    <button type="submit">View Invoice</button>
+</form>
+
+<form action="{{ url('invoices/create') }}" method="POST">
     @csrf
     <button type="submit">Create Invoice</button>
 </form>
+
 <button onclick="location.href='{{ url('/invoices/send') }}'">Send Invoice</button>
 </body>
 </html>
