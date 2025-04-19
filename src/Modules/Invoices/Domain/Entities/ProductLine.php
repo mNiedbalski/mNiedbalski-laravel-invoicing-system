@@ -89,7 +89,10 @@ class ProductLine
     {
         return $this->unitPrice;
     }
-
+    public function getId(): string
+    {
+        return $this->id;
+    }
     // Optional methods I decided to add to the class
 
     public function getTaxAmount(): Money
@@ -121,4 +124,5 @@ class ProductLine
     }
 
     // End of optional methods
+
 }

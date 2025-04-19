@@ -3,7 +3,6 @@
 namespace Modules\Invoices\Domain\Entities;
 
 use Modules\Invoices\Domain\ValueObjects\IdService;
-use Ramsey\Uuid\Uuid;
 
 class Customer
 {
@@ -27,7 +26,7 @@ class Customer
         $this->email = $email;
     }
 
-    public function getId(): int
+    public function getId(): string
     {
         return $this->id;
     }

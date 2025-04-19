@@ -12,17 +12,10 @@ use Modules\Invoices\Domain\Entities\ProductLine;
 use Modules\Invoices\Domain\Enums\StatusEnum;
 use Modules\Invoices\Domain\ValueObjects\IdService;
 use Modules\Invoices\Domain\ValueObjects\Money;
-use Modules\Invoices\Infrastructure\Repositories\InMemoryInvoiceRepository;
+use Modules\Invoices\Infrastructure\Adapters\InvoiceAdapter;
 
 class InvoiceController
 {
-    private InMemoryInvoiceRepository $repository;
-
-    public function __construct(InMemoryInvoiceRepository $repository)
-    {
-        $this->repository = $repository;
-    }
-
     public function createInvoice(Request $request)
     {
         $customer = new Customer('Maximus Decimus Meridius', 'commander@north.com');
@@ -39,7 +32,8 @@ class InvoiceController
 
         // Saving invoice in InMemoryInvoiceRepository. Normally, this would be saved in database,
         // but given that database connection wasn't mentioned in the task, we are using in-memory storage.
-        $this->repository->save($invoice);
+
+        InvoiceAdapter::toModel($invoice);
 
         session()->flash('success', 'Invoice ' . $invoice->getId() . ' created successfully!');
         return redirect()->back();
