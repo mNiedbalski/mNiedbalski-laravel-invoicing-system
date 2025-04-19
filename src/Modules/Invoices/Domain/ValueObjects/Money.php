@@ -7,15 +7,21 @@ class Money
     /** @var int Represented for example in cents. It's good because if we wanted to operate on for example dollars, we would have to use float, which is not precise enough and billing HAS to be precise. */
     private int $amount;
 
+    // @var string Currency code, e.g. 'USD', 'EUR', etc.
+    // It would be a good practice to create another ValueObject for currency, but for the sake of simplicity, I will just use string.
+    private string $currency;
+
     /** Constructor that verifies whether amount is not negative before creating object.
+     * Also applies default currency code.
      * @param int $amount
      */
-    public function __construct(int $amount)
+    public function __construct(int $amount, string $currency = 'USD')
     {
         if ($amount < 0) {
             throw new \InvalidArgumentException('Amount cannot be negative.');
         }
         $this->amount = $amount;
+        $this->currency = $currency;
     }
 
     public function getAmount(): int
@@ -53,6 +59,16 @@ class Money
     public function equals(Money $other): bool
     {
         return $this->amount === $other->getAmount();
+    }
+
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
+
+    public function setCurrency(string $currency): void
+    {
+        $this->currency = $currency;
     }
 
 }

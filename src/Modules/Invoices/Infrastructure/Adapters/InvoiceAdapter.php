@@ -2,14 +2,18 @@
 
 namespace Modules\Invoices\Infrastructure\Adapters;
 
+use Modules\Invoices\Domain\Entities\Customer;
 use Modules\Invoices\Domain\Entities\Invoice as InvoiceEntity;
+use Modules\Invoices\Domain\Entities\ProductLine;
+use Modules\Invoices\Domain\Enums\StatusEnum;
+use Modules\Invoices\Domain\ValueObjects\Money;
 use Modules\Invoices\Infrastructure\Models\CustomerModel;
 use Modules\Invoices\Infrastructure\Models\InvoiceModel;
 use Modules\Invoices\Infrastructure\Models\ProductLineModel;
 
 class InvoiceAdapter
 {
-    public static function toModel(InvoiceEntity $invoiceEntity): InvoiceModel
+    public function toModel(InvoiceEntity $invoiceEntity): InvoiceModel
     {
         //First we save customer
         $customer = $invoiceEntity->getCustomer();
@@ -43,5 +47,37 @@ class InvoiceAdapter
         }
 
         return $invoiceModel;
+    }
+    public function fromId(string $id): ?InvoiceEntity
+    {
+        // Fetch the invoice model with related customer and product lines
+        $invoiceModel = InvoiceModel::with('customer', 'productLines')->find($id);
+
+        if (!$invoiceModel) {
+            return null; // Return null if the invoice is not found
+        }
+
+        // Hydrate the Customer entity
+        $customer = new Customer(
+            $invoiceModel->customer->name,
+            $invoiceModel->customer->email
+        );
+
+        // Hydrate the ProductLine entities
+        $productLines = $invoiceModel->productLines->map(function ($productLineModel) {
+            return new ProductLine(
+                $productLineModel->name,
+                $productLineModel->quantity,
+                $productLineModel->unit_price,
+            );
+        })->toArray();
+
+        // Hydrate and return the Invoice entity
+        return new InvoiceEntity(
+            $invoiceModel->id,
+            StatusEnum::from($invoiceModel->status),
+            $customer,
+            $productLines
+        );
     }
 }

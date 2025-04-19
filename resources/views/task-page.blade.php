@@ -18,9 +18,15 @@
         h1 {
             margin-bottom: 20px;
         }
+        .invoice-buttons {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            width: 400px; /* Zwiększona szerokość kontenera */
+        }
         button {
             display: block;
-            width: 200px;
+            width: 100%; /* Przyciski zajmują całą szerokość kontenera */
             padding: 10px;
             margin: 10px 0;
             font-size: 16px;
@@ -28,6 +34,7 @@
             border: none;
             border-radius: 5px;
             color: white;
+            white-space: nowrap; /* Zapobiega zawijaniu tekstu */
         }
         button:hover {
             background-color: #0056b3;
@@ -42,21 +49,39 @@
 @endif
 <h1>Required endpoints</h1>
 
-<form action="{{ route('invoices.view') }}" method="GET">
-    <input
-        type="text"
-        name="id"
-        required
-        placeholder="Invoice ID..."
-    >
-    <button type="submit">View Invoice</button>
-</form>
-
+<h3> Create invoice </h3>
 <form action="{{ url('invoices/create') }}" method="POST">
     @csrf
     <button type="submit">Create Invoice</button>
 </form>
 
-<button onclick="location.href='{{ url('/invoices/send') }}'">Send Invoice</button>
+<h3> View invoices </h3>
+<p> To view invoice, press button with the invoice id. </p>
+<div class="invoice-buttons">
+    @if (isset($invoices) && count($invoices) > 0)
+        @foreach ($invoices as $invoice)
+            <form action="{{ route('invoices.view') }}" method="GET">
+                <input type="hidden" name="id" value="{{ $invoice->id }}">
+                <button type="submit" style="background-color: #28a745;">
+                    Invoice ID: {{ $invoice->id }}
+                </button>
+            </form>
+        @endforeach
+    @else
+        <p>No invoices available.</p>
+    @endif
+</div>
+
+{{--<form action="{{ route('invoices.view') }}" method="GET">--}}
+{{--    <input--}}
+{{--        type="text"--}}
+{{--        name="id"--}}
+{{--        required--}}
+{{--        placeholder="Invoice ID..."--}}
+{{--    >--}}
+{{--    <button type="submit">View Invoice</button>--}}
+{{--</form>--}}
+
+{{--<button onclick="location.href='{{ url('/invoices/send') }}'">Send Invoice</button>--}}
 </body>
 </html>

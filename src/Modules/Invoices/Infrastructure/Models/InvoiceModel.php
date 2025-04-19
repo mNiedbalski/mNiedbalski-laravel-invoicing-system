@@ -48,6 +48,6 @@ class InvoiceModel extends Model
     // Even though same product might be added to different invoices, it is not the same product line.
     public function productLines(): HasMany
     {
-        return $this->hasMany(ProductLineModel::class);
+        return $this->hasMany(ProductLineModel::class, 'invoice_id', 'id');
     }
 }
