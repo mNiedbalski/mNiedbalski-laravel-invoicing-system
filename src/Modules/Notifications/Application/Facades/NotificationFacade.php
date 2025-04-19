@@ -7,11 +7,12 @@ namespace Modules\Notifications\Application\Facades;
 use Modules\Notifications\Api\Dtos\NotifyData;
 use Modules\Notifications\Api\NotificationFacadeInterface;
 use Modules\Notifications\Infrastructure\Drivers\DriverInterface;
+use Modules\Notifications\Infrastructure\Drivers\DummyDriver;
 
 final readonly class NotificationFacade implements NotificationFacadeInterface
 {
     public function __construct(
-        private DriverInterface $driver,
+        private DummyDriver $driver, // Changed because DriverInterface can't be instantiated
     ) {}
 
     public function notify(NotifyData $data): void

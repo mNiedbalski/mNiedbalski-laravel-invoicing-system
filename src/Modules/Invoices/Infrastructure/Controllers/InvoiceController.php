@@ -46,7 +46,7 @@ class InvoiceController
         // Saving invoice in InMemoryInvoiceRepository. Normally, this would be saved in database,
         // but given that database connection wasn't mentioned in the task, we are using in-memory storage.
 
-        $this->invoiceAdapter->persist($invoice);
+        $this->invoiceAdapter->createModelAndPersist($invoice);
 
         session()->flash('success', 'Invoice ' . $invoice->getId() . ' created successfully!');
         return redirect()->back();
@@ -91,8 +91,8 @@ class InvoiceController
         $invoice->setStatus(StatusEnum::Sending);
         $invoiceNotificationService->execute($invoice);
 
-        $this->invoiceAdapter->persist($invoice);
-        dump($invoice);
+//        $this->invoiceAdapter->createModelAndPersist($invoice);
+//        dump($invoice);
         return response()->json(['message' => 'Invoice is being sent'], 200);
     }
 

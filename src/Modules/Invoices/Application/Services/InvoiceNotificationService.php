@@ -21,7 +21,6 @@ final class InvoiceNotificationService
             subject: 'Invoice Details - ' . $invoice->getId(),
             message: $this->buildMessage($invoice),
         );
-        dd($notifyData);
         $notificationFacade = app(NotificationFacade::class);
         $notificationFacade->notify($notifyData);
     }
