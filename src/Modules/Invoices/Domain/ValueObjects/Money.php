@@ -11,15 +11,12 @@ class Money
     // It would be a good practice to create another ValueObject for currency, but for the sake of simplicity, I will just use string.
     private string $currency;
 
-    /** Constructor that verifies whether amount is not negative before creating object.
+    /** Constructor that creates Money object from amount and optionally from currency code.
      * Also applies default currency code.
      * @param int $amount
      */
     public function __construct(int $amount, string $currency = 'USD')
     {
-        if ($amount < 0) {
-            throw new \InvalidArgumentException('Amount cannot be negative.');
-        }
         $this->amount = $amount;
         $this->currency = $currency;
     }

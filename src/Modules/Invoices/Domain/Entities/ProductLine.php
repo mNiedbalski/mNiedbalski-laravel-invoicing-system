@@ -32,6 +32,15 @@ class ProductLine
 
     public function __construct(string $name, int $quantity, Money $unitPrice, float $taxRate = 0.0, float $discountRate = 0.0, ?string $id = null )
     {
+        // Validate quantity
+        if ($quantity <= 0) {
+            throw new \InvalidArgumentException('Quantity must be a positive integer greater than zero.');
+        }
+        // Validate unit price
+        if ($unitPrice->getAmount() <= 0) {
+            throw new \InvalidArgumentException('Unit price must be a positive integer greater than zero.');
+        }
+
         //optional expansion
         if ($taxRate < 0 || $taxRate > 100) {
             throw new \InvalidArgumentException('Tax rate must be between 0 and 100.');

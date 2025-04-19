@@ -143,8 +143,18 @@ class Invoice
         return $this->status;
     }
 
+    // Product lines quantity and unit price are validated during object construction, therefore we don't have to think about it here -- it was done beforehand.
     public function setStatus(StatusEnum $status): void
     {
+        // Validating whether the status transition is correct (if draft then we can only send it, if sending then we can only assign status sent-to-client)
+        $validTransitions = [
+            StatusEnum::Draft->value => [StatusEnum::Sending->value],
+            StatusEnum::Sending->value => [StatusEnum::SentToClient->value],
+        ];
+        if (!isset($validTransitions[$this->status->value]) || !in_array($status, $validTransitions[$this->status->value])) {
+            throw new \InvalidArgumentException('Invalid status transition');
+        }
+
         $this->status = $status;
     }
     public function getTotalPrice(): Money

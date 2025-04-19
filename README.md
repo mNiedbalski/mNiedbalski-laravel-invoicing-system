@@ -1,5 +1,7 @@
 ## mNiedbalski additions:
 
+### General changes introduced by me:
+
 Instead of using integer type for prices, I have decided to introduce a new class called `Money` to handle monetary values.
 This solution is more robust and allows for better handling of currency-related operations, such as formatting and arithmetic.
 
@@ -12,6 +14,11 @@ Following those changes, I've added additional methods in Invoice class that ret
 
 Following DDD principles, I have decided to create a separate class for the Customer entity.
 
+### Database
+
+Since there is an endpoint 'viewInvoice' I have integrated application with SQLite database that was pre-connected.
+I have created ORM Eloquent models for data, with mutators and accessors (for example Money class) for the fields that require special handling.
+Finally, I have also added migrations for the database tables because some columns had to be altered or added.
 
 ### Some errors:
 I've encountered errors connected with storing invoices in memory.

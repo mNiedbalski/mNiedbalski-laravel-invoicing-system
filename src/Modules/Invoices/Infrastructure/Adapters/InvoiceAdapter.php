@@ -13,7 +13,7 @@ use Modules\Invoices\Infrastructure\Models\ProductLineModel;
 
 class InvoiceAdapter
 {
-    public function toModel(InvoiceEntity $invoiceEntity): InvoiceModel
+    public function persist(InvoiceEntity $invoiceEntity): InvoiceModel
     {
         //First we save customer
         $customer = $invoiceEntity->getCustomer();
