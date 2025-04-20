@@ -15,35 +15,37 @@ class InvoiceAdapter
 {
     public function createModelAndPersist(InvoiceEntity $invoiceEntity): InvoiceModel
     {
-        //First we save customer
+        // Update or create customer
         $customer = $invoiceEntity->getCustomer();
-        $customerModel = new CustomerModel([
-            'id' => $customer->getId(),
-            'name' => $customer->getName(),
-            'email' => $customer->getEmail(),
-        ]);
-        $customerModel->save();
+        $customerModel = CustomerModel::updateOrCreate(
+            ['id' => $customer->getId()],
+            [
+                'name' => $customer->getName(),
+                'email' => $customer->getEmail()
+            ]
+        );
 
-        //Then we save invoice
-        $invoiceModel = new InvoiceModel();
-        $invoiceModel->id = $invoiceEntity->getId();
-        $invoiceModel->status = $invoiceEntity->getStatus()->value;
-        $invoiceModel->customer_id = $invoiceEntity->getCustomer()->getId();
-        $invoiceModel->total_price = $invoiceEntity->getTotalPrice();
+        // Update or create invoice
+        $invoiceModel = InvoiceModel::updateOrCreate(
+            ['id' => $invoiceEntity->getId()],
+            [
+                'status' => $invoiceEntity->getStatus()->value,
+                'customer_id' => $customerModel->id,
+                'total_price' => $invoiceEntity->getTotalPrice()
+            ]
+        );
 
-        $invoiceModel->save();
-
-        //And since invoice model doesn't know about product lines, we save them later ( Invoice -< Product Lines )
         foreach ($invoiceEntity->getProductLines() as $productLine) {
-            $productLine = new ProductLineModel([
-                'id' => $productLine->getId(),
-                'name' => $productLine->getName(),
-                'quantity' => $productLine->getQuantity(),
-                'unit_price' => $productLine->getUnitPrice(),
-                'total_unit_price' => $productLine->getTotalUnitPrice(),
-                'invoice_id' => $invoiceModel->id,
-            ]);
-            $productLine->save();
+            ProductLineModel::updateOrCreate(
+                ['id' => $productLine->getId()],
+                [
+                    'name' => $productLine->getName(),
+                    'quantity' => $productLine->getQuantity(),
+                    'unit_price' => $productLine->getUnitPrice(),
+                    'total_unit_price' => $productLine->getTotalUnitPrice(),
+                    'invoice_id' => $invoiceModel->id
+                ]
+            );
         }
 
         return $invoiceModel;

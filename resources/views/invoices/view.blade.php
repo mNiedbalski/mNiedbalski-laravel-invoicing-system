@@ -71,7 +71,7 @@
         setTimeout(() => {
             const element = document.getElementById('flash-message');
             if (element) element.style.display = 'none';
-        }, 5000);
+        }, 7000);
     </script>
 </head>
 <body>

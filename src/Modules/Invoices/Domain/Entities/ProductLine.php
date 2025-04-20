@@ -34,20 +34,20 @@ class ProductLine
     {
         // Validate quantity
         if ($quantity <= 0) {
-            throw new \InvalidArgumentException('Quantity must be a positive integer greater than zero.');
+            throw new \InvalidArgumentException('Quantity of item ' . $name . ' must be a positive integer greater than zero.');
         }
         // Validate unit price
         if ($unitPrice->getAmount() <= 0) {
-            throw new \InvalidArgumentException('Unit price must be a positive integer greater than zero.');
+            throw new \InvalidArgumentException('Unit price of item ' . $name . ' must be a positive integer greater than zero.');
         }
 
         //optional expansion
         if ($taxRate < 0 || $taxRate > 100) {
-            throw new \InvalidArgumentException('Tax rate must be between 0 and 100.');
+            throw new \InvalidArgumentException('Tax rate of item ' . $name . ' must be between 0 and 100.');
         }
 
         if ($discountRate < 0 || $discountRate > 100) {
-            throw new \InvalidArgumentException('Discount rate must be between 0 and 100.');
+            throw new \InvalidArgumentException('Discount rate of item ' . $name . ' must be between 0 and 100.');
         }
         //end of optional expansion
 
