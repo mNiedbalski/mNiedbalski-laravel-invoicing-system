@@ -80,4 +80,19 @@ class InvoiceAdapter
             $productLines
         );
     }
+
+    /**
+     * This method only updates the status of the invoice in database, because Invoice data like customer, product lines and prices are immutable.
+     * @param InvoiceEntity $invoiceEntity
+     * @return void
+     */
+    public function updateAndPersist(InvoiceEntity $invoiceEntity): void
+    {
+        $invoiceModel = InvoiceModel::updateOrCreate(
+            ['id' => $invoiceEntity->getId()],
+            [
+                'status' => $invoiceEntity->getStatus()->value,
+            ]
+        );
+    }
 }

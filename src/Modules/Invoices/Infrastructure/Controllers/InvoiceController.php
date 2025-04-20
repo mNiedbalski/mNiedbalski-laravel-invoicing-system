@@ -20,6 +20,7 @@ class InvoiceController
 {
     public function __construct(
         private readonly InvoiceAdapter $invoiceAdapter,
+        private readonly InvoiceNotificationService $invoiceNotificationService,
     )
     {
     }
@@ -68,7 +69,6 @@ class InvoiceController
 
     public function sendInvoice(Request $request): JsonResponse
     {
-        $invoiceNotificationService = app(InvoiceNotificationService::class);
         $id = $request->input('id');
         $invoice = $this->invoiceAdapter->fromId($id);
         if (!$invoice) {
@@ -86,13 +86,11 @@ class InvoiceController
             }
         }
 
-        // Send notification using SendInvoiceNotification service (I've created my own service to encapsulate the logic of sending invoice notifications)
-//        $sendInvoiceNotification = app(SendInvoiceNotification::class);
         $invoice->setStatus(StatusEnum::Sending);
-        $invoiceNotificationService->execute($invoice);
 
-//        $this->invoiceAdapter->createModelAndPersist($invoice);
-//        dump($invoice);
+        $this->invoiceNotificationService->execute($invoice);
+        $this->invoiceAdapter->updateAndPersist($invoice);
+
         return response()->json(['message' => 'Invoice is being sent'], 200);
     }
 
