@@ -56,7 +56,7 @@ class InvoiceAdapter
         $invoiceModel = InvoiceModel::with('customer', 'productLines')->find($id);
 
         if (!$invoiceModel) {
-            return null; // Return null if the invoice is not found
+            throw new \DomainException('Invoice not found');
         }
 
         // Hydrate the Customer entity
@@ -76,10 +76,10 @@ class InvoiceAdapter
 
         // Hydrate and return the Invoice entity
         return new InvoiceEntity(
+            $customer,
+            $productLines,
             $invoiceModel->id,
             StatusEnum::from($invoiceModel->status),
-            $customer,
-            $productLines
         );
     }
 

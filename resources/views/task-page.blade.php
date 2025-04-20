@@ -4,93 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Page</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-        }
-        h1 {
-            margin-bottom: 20px;
-        }
-        .invoice-buttons {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            width: 400px; /* Zwiększona szerokość kontenera */
-        }
-        button {
-            display: block;
-            width: 100%; /* Przyciski zajmują całą szerokość kontenera */
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            background-color: #595959;
-            white-space: nowrap; /* Zapobiega zawijaniu tekstu */
-        }
-        button:hover {
-            background-color: #333333;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('styles/task-page.css') }}">
     <script>
         setTimeout(() => {
             const element = document.getElementById('flash-message');
             if (element) element.style.display = 'none';
-        }, 7000);
+        }, 5000);
     </script>
 </head>
 <body>
 
-@if(session('success'))
-    <div id="flash-message" class="alert alert-success" style="color: green; padding: 15px; margin-bottom: 20px; border: 1px solid #d6e9c6; border-radius: 4px; background-color: #dff0d8;">
-        {{ session('success') }}
-    </div>
-@endif
-@if(session('error'))
-    <div id="flash-message" class="alert alert-danger" style="color: #a94442; padding: 15px; margin-bottom: 20px; border: 1px solid #ebccd1; border-radius: 4px; background-color: #f2dede;">
-        {{ session('error') }}
-    </div>
-@endif
+<div class="container">
 
-<h1>Required endpoints</h1>
-
-<h3> Create invoice </h3>
-<form action="{{ url('invoices/create') }}" method="POST">
-    @csrf
-    <button type="submit">Create Invoice</button>
-</form>
-
-<h3> View invoices </h3>
-<p>(sending button will be visible after clicking invoice button page)</p>
-<div class="invoice-buttons">
-    @if (isset($invoices) && count($invoices) > 0)
-        @foreach ($invoices as $invoice)
-            <form action="{{ route('invoices.view') }}" method="GET">
-                <input type="hidden" name="id" value="{{ $invoice->id }}">
-                <button type="submit" class="button">
-                    Invoice ID: {{ $invoice->id }}
-                </button>
-            </form>
-        @endforeach
-    @else
-        <p>No invoices available.</p>
+    @if(session('success'))
+        <div id="flash-message" class="alert alert-success" style="color: green; padding: 15px; margin-bottom: 20px; border: 1px solid #d6e9c6; border-radius: 4px; background-color: #dff0d8;">
+            {{ session('success') }}
+        </div>
     @endif
+    @if(session('error'))
+        <div id="flash-message" class="alert alert-danger" style="color: #a94442; padding: 15px; margin-bottom: 20px; border: 1px solid #ebccd1; border-radius: 4px; background-color: #f2dede;">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <h1>Required endpoints</h1>
+
+    <h3> Create invoice </h3>
+    <form action="{{ route('invoices.create') }}" method="POST">
+        @csrf
+        <button type="submit">Create Invoice</button>
+    </form>
+
+    <h3> View invoices </h3>
+    <p>(sending button will be visible after clicking invoice button page)</p>
+    <div class="invoice-buttons">
+        @if (isset($invoices) && count($invoices) > 0)
+            @foreach ($invoices as $invoice)
+                <form action="{{ route('invoices.view') }}" method="GET">
+                    <input type="hidden" name="id" value="{{ $invoice->id }}">
+                    <button type="submit" class="button">
+                        Invoice ID: {{ $invoice->id }}
+                    </button>
+                </form>
+            @endforeach
+        @else
+            <p>No invoices available.</p>
+        @endif
+    </div>
+
+    <h3> Create test invoices (for assessment purposes) </h3>
+    <form action="{{ route('invoices.mock') }}" method="POST">
+        @csrf
+        <button type="submit">Fill the database!</button>
+    </form>
 </div>
 
-<h3> Create test invoices (for assessment purposes) </h3>
-<form action="{{ url('invoices/create-test-invoices') }}" method="POST">
-    @csrf
-    <button type="submit">Fill the database!</button>
-</form>
 
 {{--<form action="{{ route('invoices.view') }}" method="GET">--}}
 {{--    <input--}}

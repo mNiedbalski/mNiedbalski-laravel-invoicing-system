@@ -2,28 +2,22 @@
 
 namespace Modules\Invoices\Infrastructure\Controllers;
 
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Http;
-use Modules\Invoices\Application\Services\InvoiceNotificationService;
-use Modules\Invoices\Domain\Entities\Customer;
-use Modules\Invoices\Domain\Entities\Invoice;
-use Modules\Invoices\Domain\Entities\ProductLine;
-use Modules\Invoices\Domain\Enums\StatusEnum;
-use Modules\Invoices\Domain\ValueObjects\IdService;
-use Modules\Invoices\Domain\ValueObjects\Money;
+use Modules\Invoices\Application\Services\InvoiceService;
 use Modules\Invoices\Infrastructure\Adapters\InvoiceAdapter;
-use Modules\Invoices\Infrastructure\Models\CustomerModel;
 use Modules\Invoices\Infrastructure\Models\InvoiceModel;
-use Modules\Notifications\Application\Facades\NotificationFacade;
 
-class InvoiceController
+/**
+ *  Class responsible for handling invoice-related requests.
+ * This class uses the InvoiceAdapter to load invoice from database and the business logic operations are performed in InvoiceService to ensure that DDD principles are followed.
+ */
+readonly class InvoiceController
 {
     public function __construct(
-        private readonly InvoiceAdapter             $invoiceAdapter,
-        private readonly InvoiceNotificationService $invoiceNotificationService,
+        private InvoiceAdapter             $invoiceAdapter,
+        private InvoiceService             $invoiceService,
     )
     {
     }
@@ -37,21 +31,10 @@ class InvoiceController
     public function createInvoice(Request $request): RedirectResponse
     {
         try {
-            // Using pre-defined customer and product lines for the sake of simplicity (normally, these would be passed from the form)
+            // Here we would use passed data from the form
+            $invoiceId = $this->invoiceService->createInvoice();
 
-            $customer = new Customer('Michal Niedbalski', 'niedbalsky@gmail.com', '68a39cca-1825-430e-9920-030731213194');
-            $productLine1 = new ProductLine(name: 'Running shoes', quantity: 1, unitPrice: new Money(19900));
-            $productLine2 = new ProductLine(name: 'Water bottle', quantity: 3, unitPrice: new Money(200));
-            $productLine3 = new ProductLine(name: 'Shirt with number tag', quantity:  1, unitPrice: new Money(5000));
-
-            $invoice = new Invoice(customer: $customer, productLines: [$productLine1, $productLine2, $productLine3]);
-
-            // Saving invoice in InMemoryInvoiceRepository. Normally, this would be saved in database,
-            // but given that database connection wasn't mentioned in the task, we are using in-memory storage.
-
-            $this->invoiceAdapter->createModelAndPersist($invoice);
-
-            session()->flash('success', 'Invoice ' . $invoice->getId() . ' created successfully!');
+            session()->flash('success', 'Invoice ' . $invoiceId . ' created successfully!');
             return redirect()->back();
 
         } catch (\InvalidArgumentException $e) {
@@ -74,42 +57,27 @@ class InvoiceController
 
     public function viewInvoice(Request $request): View
     {
-        $id = $request->query('id'); // Retrieve 'id' from query parameters
-        $invoice = $this->invoiceAdapter->fromId($id); // Fetch the invoice by ID
+        try {
+            $id = $request->query('id'); // Retrieve 'id' from query parameters
+            $invoice = $this->invoiceAdapter->fromId($id); // Fetch the invoice by ID
 
-        // Check if the invoice exists (for example if we want to add input searching in the future instead of id-mapped buttons)
-        if (!$invoice) {
+            // If the invoice exists, return the view with the invoice data
+            return view('invoices.view', ['invoice' => $invoice]);
+        } catch (\DomainException $e) {
             return view('invoices.view', [
                 'error' => 'Invoice not found'
             ]);
         }
-        // If the invoice exists, return the view with the invoice data
-        return view('invoices.view', ['invoice' => $invoice]);
     }
 
-    public function sendInvoice(Request $request)
+    public function sendInvoice(Request $request): RedirectResponse
     {
         try {
             $id = $request->input('id');
-            $invoice = $this->invoiceAdapter->fromId($id);
 
-            if (!$invoice) {
-                session()->flash('error', 'Invoice not found');
-                return redirect()->back();
-            }
+            $this->invoiceService->sendInvoice($id);
 
-            // Checking product lines (quantities and prices are already validated in ProductLine constructor)
-            if (empty($invoice->getProductLines())) {
-                session()->flash('error', 'Invoice must have at least one product line');
-                return redirect()->back();
-            }
-
-            // Method uses setter which has guardian that validates the status
-            $invoice->markAsSending();
-            $this->invoiceAdapter->updateAndPersist($invoice);
-            $this->invoiceNotificationService->execute($invoice);
-
-            session()->flash('success', 'Invoice ' . $invoice->getId() . ' is being sent!');
+            session()->flash('success', 'Invoice ' . $id . ' is being sent!');
             return redirect()->back();
 
         } catch (\InvalidArgumentException | \DomainException $e) {
@@ -123,30 +91,12 @@ class InvoiceController
     }
 
     // Bonus for testing purposes
-    public function createTestInvoicesForDb()
+    public function mockDatabase(): RedirectResponse
     {
         try {
-        $customer = new Customer('Paul Muadib Atreides', 'duke@arrakis.com');
-        $productLine1 = new ProductLine(name: 'Ornithopter / Wings', quantity: 8, unitPrice: new Money(89999));
-        $productLine2 = new ProductLine(name: 'Ornithopter / Back landing gear ', quantity: 2,  unitPrice: new Money(500000));
-        $productLine3 = new ProductLine(name: 'Ornithopter / Front glass', quantity: 1, unitPrice: new Money(900000));
-        $productLine4 = new ProductLine(name: 'Assembly', quantity: 1, unitPrice: new Money(500000));
-        $productLine5 = new ProductLine(name: 'Ornithopter / Electronics', quantity: 1, unitPrice: new Money(200000));
-        $invoice = new Invoice(customer: $customer, productLines: [$productLine1, $productLine2, $productLine3, $productLine4, $productLine5]);
-        $this->invoiceAdapter->createModelAndPersist($invoice);
 
-        $customer = new Customer('Darth Sidious', 'imperator@galaxy.com');
-        $productLine1 = new ProductLine(name: 'Lightsaber', quantity: 2, unitPrice: new Money(1000000));
-        $productLine2 = new ProductLine(name: 'Darth Vader - full armor kit', quantity: 1,  unitPrice: new Money(999999));
-        $productLine3 = new ProductLine(name: 'Assembly', quantity: 1, unitPrice: new Money(500000));
-        $productLine4 = new ProductLine(name: 'Doctors', quantity: 1, unitPrice: new Money(199900));
-        $invoice = new Invoice(customer: $customer, productLines: [$productLine1, $productLine2, $productLine3, $productLine4]);
-
-        $customer = new Customer('Forgot To Add Products', 'cant@remember.io');
-        $invoice = new Invoice(customer: $customer);
-
-        $this->invoiceAdapter->createModelAndPersist($invoice);
-        session()->flash('success', 'Invoice ' . $invoice->getId() . ' created successfully!');
+        $this->invoiceService->mockDatabase();
+        session()->flash('success', 'Mock invoices created successfully!');
 
         return redirect()->back();
 

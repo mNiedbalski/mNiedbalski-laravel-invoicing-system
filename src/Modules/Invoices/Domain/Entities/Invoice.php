@@ -80,6 +80,19 @@ class Invoice
         }
         $this->status = StatusEnum::SentToClient;
     }
+    /** If somehow it is accepted that ProductLines are mutable, then this method should be used to validate them.
+     * @return void
+     */
+    public function validateProductLines(): void{
+        foreach ($this->productLines as $productLine){
+            if ($productLine->getQuantity() <= 0) {
+                throw new \DomainException('Product line quantity must be greater than zero.');
+            }
+            if ($productLine->getUnitPrice()->getAmount() <= 0) {
+                throw new \DomainException('Product line unit price must be greater than zero.');
+            }
+        }
+    }
 
 
     // OPTIONAL EXPANSION
