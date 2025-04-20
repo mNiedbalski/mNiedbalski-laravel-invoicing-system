@@ -67,9 +67,26 @@
             text-align: right;
         }
     </style>
+    <script>
+        setTimeout(() => {
+            const element = document.getElementById('flash-message');
+            if (element) element.style.display = 'none';
+        }, 5000);
+    </script>
 </head>
 <body>
 <div class="container">
+    @if(session('success'))
+        <div id="flash-message" class="alert alert-success" style="color: green; padding: 15px; margin-bottom: 20px; border: 1px solid #d6e9c6; border-radius: 4px; background-color: #dff0d8;">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div id="flash-message" class="alert alert-danger" style="color: #a94442; padding: 15px; margin-bottom: 20px; border: 1px solid #ebccd1; border-radius: 4px; background-color: #f2dede;">
+            {{ session('error') }}
+        </div>
+    @endif
     <h1>Invoice Details</h1>
 
     @if (isset($error))

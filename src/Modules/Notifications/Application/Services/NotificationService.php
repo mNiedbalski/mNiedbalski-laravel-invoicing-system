@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Notifications\Application\Services;
 
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Support\Facades\Log;
 use Modules\Notifications\Api\Events\ResourceDeliveredEvent;
 use Ramsey\Uuid\Uuid;
 

@@ -1,30 +1,53 @@
 ## mNiedbalski additions:
+### Running project
 
-### General changes introduced by me:
+In first terminal:
+`docker compose up -d` <br>
+`docker compose exec app bash` <br>
+`php artisan queue:work redis` <br>
+In second terminal:
+`docker compose exec app bash`
+`php artisan serve` <br>
 
+### Configuration
+
+Since I'm working on Windows, I had to change the port in the docker-compose.yml file to 8080. (WSL conflicts with port 8000)
+
+I've encountered errors connected with storing invoices in memory (it probably doesn't matter at this point because I was trying different approach to data storing).
+Those lines solved the problem:
+`chmod -R guo+w storage`
+`php artisan cache:clear`
+
+### Price/Amount/Money representation
 Instead of using integer type for prices, I have decided to introduce a new class called `Money` to handle monetary values.
 This solution is more robust and allows for better handling of currency-related operations, such as formatting and arithmetic.
 
+### Autogenerating UUID
 I've decided to add ramsey/uuid library for UUID generation, as it is a widely used library for this purpose in PHP.
 It is better to use a library that is well-tested and widely adopted rather than implementing a custom solution.
 
+### ProductLine extensions
 I have also decided to add taxRate and discountRate fields to the ProductLine class, as these are common fields in invoice systems.
 They won't be interfering with core functionality, but they will allow for more flexibility in the future.
 Following those changes, I've added additional methods in Invoice class that return taxed, discounted and taxed+discounted amounts.
 
+### Schema additions
 Following DDD principles, I have decided to create a separate class for the Customer entity.
+
+### Sending invoices
+To handle the sending of invoices, I have created a new service called `InvoiceNotificationService` that is responsible for sending the invoice to the customer.
+This service uses NotificationFacade to send the invoice, but also encapsulates specific logic related to sending invoices.
+
+### Event handling
+
+I have added an InvoiceEventServiceProvider and UpdateInvoiceStatusListener to handle the event of invoice status update.
+I'm using Redis work queue to handle the event asynchronously (even though it's a simple case, I wanted to prepare event handler for more advanced operations that shouldn't be done synchronously).
 
 ### Database
 
-Since there is an endpoint 'viewInvoice' I have integrated application with SQLite database that was pre-connected.
+Since there are endpoints that may suggest storing invoice data somewhere, I have integrated application with SQLite database that was pre-connected.
 I have created ORM Eloquent models for data, with mutators and accessors (for example Money class) for the fields that require special handling.
 Finally, I have also added migrations for the database tables because some columns had to be altered or added.
-
-### Some errors:
-I've encountered errors connected with storing invoices in memory.
-Those lines solved problem:
-`chmod -R guo+w storage
-php artisan cache:clear`
 
 ## Invoice Structure:
 

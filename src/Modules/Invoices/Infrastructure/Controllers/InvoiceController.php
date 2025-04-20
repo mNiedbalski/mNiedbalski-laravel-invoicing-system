@@ -3,8 +3,10 @@
 namespace Modules\Invoices\Infrastructure\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Http;
 use Modules\Invoices\Application\Services\InvoiceNotificationService;
 use Modules\Invoices\Domain\Entities\Customer;
 use Modules\Invoices\Domain\Entities\Invoice;
@@ -19,7 +21,7 @@ use Modules\Notifications\Application\Facades\NotificationFacade;
 class InvoiceController
 {
     public function __construct(
-        private readonly InvoiceAdapter $invoiceAdapter,
+        private readonly InvoiceAdapter             $invoiceAdapter,
         private readonly InvoiceNotificationService $invoiceNotificationService,
     )
     {
@@ -30,7 +32,8 @@ class InvoiceController
         $invoices = InvoiceModel::all();
         return view('task-page', ['invoices' => $invoices]);
     }
-    public function createInvoice(Request $request)
+
+    public function createInvoice(Request $request): RedirectResponse
     {
         $customer = new Customer('Michal Niedbalski', 'niedbalsky@gmail.com');
         $productLine1 = new ProductLine('Running shoes', 1, new Money(19900));
@@ -52,6 +55,7 @@ class InvoiceController
         session()->flash('success', 'Invoice ' . $invoice->getId() . ' created successfully!');
         return redirect()->back();
     }
+
     public function viewInvoice(Request $request): View
     {
         $id = $request->query('id'); // Retrieve 'id' from query parameters
@@ -67,31 +71,39 @@ class InvoiceController
         return view('invoices.view', ['invoice' => $invoice]);
     }
 
-    public function sendInvoice(Request $request): JsonResponse
+    public function sendInvoice(Request $request)
     {
-        $id = $request->input('id');
-        $invoice = $this->invoiceAdapter->fromId($id);
-        if (!$invoice) {
-            return response()->json(['error' => 'Invoice not found'], 404);
-        }
+        try {
+            $id = $request->input('id');
+            $invoice = $this->invoiceAdapter->fromId($id);
 
-        // Validate invoice status and product lines
-        if ($invoice->getStatus() !== StatusEnum::Draft) {
-            return response()->json(['error' => 'Invoice must be in draft status to be sent'], 400);
-        }
-
-        foreach ($invoice->getProductLines() as $productLine) {
-            if ($productLine->getQuantity() <= 0 || $productLine->getUnitPrice()->getAmount() <= 0) {
-                return response()->json(['error' => 'Product lines must have positive quantity and unit price'], 400);
+            if (!$invoice) {
+                session()->flash('error', 'Invoice not found');
+                return redirect()->back();
             }
+
+            // Checking product lines (quantities and prices are already validated in ProductLine constructor)
+            if (empty($invoice->getProductLines())) {
+                session()->flash('error', 'Invoice must have at least one product line');
+                return redirect()->back();
+            }
+
+            // Setter has guardian that validates the status
+            $invoice->setStatus(StatusEnum::Sending);
+            $this->invoiceAdapter->updateAndPersist($invoice);
+            $this->invoiceNotificationService->execute($invoice);
+
+            session()->flash('success', 'Invoice ' . $invoice->getId() . ' is being sent!');
+            return redirect()->back();
+
+        } catch (\InvalidArgumentException $e) {
+            session()->flash('error', $e->getMessage());
+            return redirect()->back();
+        } catch (\Exception $e) {
+            session()->flash('error', 'An unexpected error occurred while sending the invoice');
+            logger()->error('Invoice sending failed: ' . $e->getMessage());
+            return redirect()->back();
         }
-
-        $invoice->setStatus(StatusEnum::Sending);
-
-        $this->invoiceNotificationService->execute($invoice);
-        $this->invoiceAdapter->updateAndPersist($invoice);
-
-        return response()->json(['message' => 'Invoice is being sent'], 200);
     }
 
 }

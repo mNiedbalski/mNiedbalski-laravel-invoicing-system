@@ -40,10 +40,16 @@
             background-color: #0056b3;
         }
     </style>
+    <script>
+        setTimeout(() => {
+            const element = document.getElementById('flash-message');
+            if (element) element.style.display = 'none';
+        }, 5000);
+    </script>
 </head>
 <body>
-@if (session('success'))
-    <div style="color: green; margin-bottom: 20px;">
+@if(session('success'))
+    <div id="flash-message" class="alert alert-success" style="color: green; padding: 15px; margin-bottom: 20px; border: 1px solid #d6e9c6; border-radius: 4px; background-color: #dff0d8;">
         {{ session('success') }}
     </div>
 @endif
