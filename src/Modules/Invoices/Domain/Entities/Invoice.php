@@ -37,14 +37,16 @@ class Invoice
      * @param array $productLines
      */
     public function __construct(
-        ?string $id,
-        StatusEnum $status,
         Customer   $customer,
         array      $productLines = [],
+        ?string $id = null,
+        StatusEnum $status = StatusEnum::Draft,
     )
     {
         $this->id = $id ?? IdService::generate();
-        $this->status = $status;
+
+        // If ID is not provided then we assume it's a new invoice and set status to Draft. If id was provided, then it is known that Invoice is read from DB.
+        $this->status = $id ? $status : StatusEnum::Draft;
         $this->customer = $customer;
         $this->productLines = $productLines;
         $this->calculateTotalPrice();
@@ -56,6 +58,27 @@ class Invoice
         foreach ($this->productLines as $productLine) {
             $this->totalPrice = $this->totalPrice->add($productLine->getTotalUnitPrice());
         }
+    }
+    /** Marking invoice as sending with status transition validation.
+     * @return void
+     */
+    public function markAsSending(): void
+    {
+        if ($this->status !== StatusEnum::Draft) {
+            throw new \DomainException('Invoice must be in draft status to be sent.');
+        }
+        $this->status = StatusEnum::Sending;
+    }
+
+    /** Marking invoice as sent to client with status transition validation.
+     * @return void
+     */
+    public function markAsSentToClient(): void
+    {
+        if ($this->status !== StatusEnum::Sending) {
+            throw new \DomainException('Invoice must be in sending status to be marked as sent-to-client.');
+        }
+        $this->status = StatusEnum::SentToClient;
     }
 
 
@@ -106,7 +129,7 @@ class Invoice
     }
     // END OF OPTIONAL EXPANSION
 
-//    //Commented out intentionally.
+//    //Commented out intentionally because at the stage of creating invoice productLines array is immutable.
 //    public function addProductLine(ProductLine $productLine): void
 //    {
 //        $this->productLines[] = $productLine;
@@ -141,21 +164,6 @@ class Invoice
     public function getStatus(): StatusEnum
     {
         return $this->status;
-    }
-
-    // Product lines quantity and unit price are validated during object construction, therefore we don't have to think about it here -- it was done beforehand.
-    public function setStatus(StatusEnum $status): void
-    {
-        // Validating whether the status transition is correct (if draft then we can only send it, if sending then we can only assign status sent-to-client)
-        $validTransitions = [
-            StatusEnum::Draft->value => [StatusEnum::Sending->value],
-            StatusEnum::Sending->value => [StatusEnum::SentToClient->value],
-        ];
-        if (!isset($validTransitions[$this->status->value]) || !in_array($status->value, $validTransitions[$this->status->value])) {
-            throw new \InvalidArgumentException('Invalid status transition');
-        }
-
-        $this->status = $status;
     }
     public function getTotalPrice(): Money
     {

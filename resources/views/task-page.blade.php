@@ -34,10 +34,11 @@
             border: none;
             border-radius: 5px;
             color: white;
+            background-color: #595959;
             white-space: nowrap; /* Zapobiega zawijaniu tekstu */
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #333333;
         }
     </style>
     <script>
@@ -69,13 +70,13 @@
 </form>
 
 <h3> View invoices </h3>
-<p> To view invoice, press button with the invoice id. </p>
+<p>(sending button will be visible after clicking invoice button page)</p>
 <div class="invoice-buttons">
     @if (isset($invoices) && count($invoices) > 0)
         @foreach ($invoices as $invoice)
             <form action="{{ route('invoices.view') }}" method="GET">
                 <input type="hidden" name="id" value="{{ $invoice->id }}">
-                <button type="submit" style="background-color: #28a745;">
+                <button type="submit" class="button">
                     Invoice ID: {{ $invoice->id }}
                 </button>
             </form>
@@ -84,6 +85,12 @@
         <p>No invoices available.</p>
     @endif
 </div>
+
+<h3> Create test invoices (for assessment purposes) </h3>
+<form action="{{ url('invoices/create-test-invoices') }}" method="POST">
+    @csrf
+    <button type="submit">Fill the database!</button>
+</form>
 
 {{--<form action="{{ route('invoices.view') }}" method="GET">--}}
 {{--    <input--}}

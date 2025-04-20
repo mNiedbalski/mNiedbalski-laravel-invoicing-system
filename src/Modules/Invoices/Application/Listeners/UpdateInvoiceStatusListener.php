@@ -26,7 +26,7 @@ class UpdateInvoiceStatusListener implements ShouldQueue
         $invoice = $this->invoiceAdapter->fromId($event->resourceId);
 
         if ($invoice && $invoice->getStatus() === StatusEnum::Sending) {
-            $invoice->setStatus(StatusEnum::SentToClient);
+            $invoice->markAsSentToClient();
             $this->invoiceAdapter->updateAndPersist($invoice);
         }
     }

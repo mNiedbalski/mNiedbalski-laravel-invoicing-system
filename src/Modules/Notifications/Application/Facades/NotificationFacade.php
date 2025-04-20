@@ -27,6 +27,8 @@ final readonly class NotificationFacade implements NotificationFacadeInterface
         if ($isSending){
             $action = 'delivered';
             $reference = $data->resourceId->toString();
+
+            // I had to use this solution with host.docker.internal:8080 because there were some errors. There is a chance it was due to my custom 8080 port mapping in docker-compose.yml (WSL on Windows problems with port 8000 occupied)
             $routeUrl = route('notification.hook', ['action' => $action, 'reference' => $reference], false); // Generate relative path
             $routeUrl = 'http://host.docker.internal:8080' . $routeUrl; // Prepend the correct host and port
             Http::get($routeUrl);

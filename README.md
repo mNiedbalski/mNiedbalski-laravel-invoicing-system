@@ -49,6 +49,15 @@ Since there are endpoints that may suggest storing invoice data somewhere, I hav
 I have created ORM Eloquent models for data, with mutators and accessors (for example Money class) for the fields that require special handling.
 Finally, I have also added migrations for the database tables because some columns had to be altered or added.
 
+### Ommited functionality
+
+It wasn't specified whether creating an invoice should be done from form data, therefore I have hardcoded needed values in controller and createInvoice button acts as trigger.
+
+## Difficulties
+
+* There were some errors connected with `DriverInterface` and I decided to use `DummyDriver`. 
+* Another problem was with `NotificationFacade` and url handling -- I had to use http://host.docker.internal:8080 instead of `127.0.0.1:8080`. 
+I suspect it might have been caused by the fact that I was working on Windows and WSL had some conflicts.
 ## Invoice Structure:
 
 The invoice should contain the following fields:
