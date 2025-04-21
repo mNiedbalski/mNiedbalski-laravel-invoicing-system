@@ -20,13 +20,13 @@ final readonly class NotificationFacade implements NotificationFacadeInterface
 
     public function notify(NotifyData $data): void
     {
-        $isSending = $this->driver->send(
+        $sent = $this->driver->send(
             toEmail: $data->toEmail,
             subject: $data->subject,
             message: $data->message,
             reference: $data->resourceId->toString(),
         );
-        if ($isSending) {
+        if ($sent) {
             $action = 'delivered';
             $reference = $data->resourceId->toString();
             $routeUrl = route('notification.hook', ['action' => $action, 'reference' => $reference], false); // Generate relative path

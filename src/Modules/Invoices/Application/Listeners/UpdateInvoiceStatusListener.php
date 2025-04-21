@@ -24,12 +24,16 @@ class UpdateInvoiceStatusListener implements ShouldQueue
 
     public function handle(ResourceDeliveredEvent $event): void
     {
-        Log::info('Triggered event');
-        $invoice = $this->invoiceAdapter->findById($event->resourceId);
-
-        if ($invoice && $invoice->getStatus() === StatusEnum::Sending) {
+        try {
+            Log::info('Triggered UpdateInvoiceStatusListener');
+            $invoice = $this->invoiceAdapter->findById($event->resourceId);
             $invoice->markAsSentToClient();
             $this->invoiceAdapter->update($invoice);
+
+        } catch (\DomainException $e) {
+            Log::error('Error updating invoice status: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('Unexpected error occurred!: ' . $e->getMessage());
         }
     }
 }

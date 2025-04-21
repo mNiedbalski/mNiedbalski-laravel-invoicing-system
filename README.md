@@ -2,16 +2,17 @@
 ### Running project
 
 In first terminal:
-`docker compose up -d` <br>
-`docker compose exec app bash` <br>
-`php artisan queue:work redis` <br>
+* `docker compose up -d` <br>
+* `docker compose exec app bash` <br>
+* `php artisan queue:work redis` <br>
 In second terminal:
-`docker compose exec app bash`
-`php artisan serve` <br>
+* `docker compose exec app bash`
+* `php artisan serve` <br>
 
 ### Configuration
 
 Since I'm working on Windows, I had to change the port in the docker-compose.yml file to 8080. (WSL conflicts with port 8000)
+* `- '${APP_PORT:-8080}:80'` -- Line 12, docker-compose.yml
 
 I've encountered errors connected with storing invoices in memory (it probably doesn't matter at this point because I was trying different approach to data storing).
 Those lines solved the problem:
@@ -40,7 +41,7 @@ This service uses NotificationFacade to send the invoice, but also encapsulates 
 
 ### Event handling
 
-I have added an InvoiceEventServiceProvider and UpdateInvoiceStatusListener to handle the event of invoice status update.
+I have added an `InvoiceEventServiceProvider` and `UpdateInvoiceStatusListener` to handle the event of invoice status update.
 I'm using Redis work queue to handle the event asynchronously (even though it's a simple case, I wanted to prepare event handler for more advanced operations that shouldn't be done synchronously).
 
 ### Database
