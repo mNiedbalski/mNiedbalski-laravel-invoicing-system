@@ -68,6 +68,13 @@ It wasn't specified whether creating an invoice should be done from form data, t
 * Another problem was with `NotificationFacade` and url handling -- I had to use http://host.docker.internal:8080 instead of `127.0.0.1:8080`. 
 I suspect it might have been caused by the fact that I was working on Windows and WSL had some conflicts.
 
+## Testing
+
+### Endpoints
+Endpoints were tested manually and I have added PHPUnit test for EventListener which is commented out (that's why warning will be displayed after running tests).
+
+### Core logic
+Core logic was thoroughly tested with PHPUnit tests.
 # Task description
 
 ## Invoice Structure:
