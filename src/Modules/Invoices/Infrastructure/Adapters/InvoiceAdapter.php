@@ -6,14 +6,28 @@ use Modules\Invoices\Domain\Entities\Customer;
 use Modules\Invoices\Domain\Entities\Invoice as InvoiceEntity;
 use Modules\Invoices\Domain\Entities\ProductLine;
 use Modules\Invoices\Domain\Enums\StatusEnum;
-use Modules\Invoices\Domain\ValueObjects\Money;
+use Modules\Invoices\Domain\Repositories\InvoiceRepositoryInterface;
 use Modules\Invoices\Infrastructure\Models\CustomerModel;
 use Modules\Invoices\Infrastructure\Models\InvoiceModel;
 use Modules\Invoices\Infrastructure\Models\ProductLineModel;
 
-class InvoiceAdapter
+class InvoiceAdapter implements InvoiceRepositoryInterface
 {
-    public function createModelAndPersist(InvoiceEntity $invoiceEntity): InvoiceModel
+    public function create(InvoiceEntity $invoice): void
+    {
+        $this->createModelAndPersist($invoice);
+    }
+
+    public function update(InvoiceEntity $invoice): void
+    {
+        $this->updateAndPersist($invoice);
+    }
+
+    /** Creating corresponding ORM Eloquent models and persisting them to the database.
+     * @param InvoiceEntity $invoiceEntity
+     * @return void
+     */
+    private function createModelAndPersist(InvoiceEntity $invoiceEntity): void
     {
         // Update or create customer
         $customer = $invoiceEntity->getCustomer();
@@ -48,9 +62,8 @@ class InvoiceAdapter
             );
         }
 
-        return $invoiceModel;
     }
-    public function fromId(string $id): ?InvoiceEntity
+    public function findById(string $id): ?InvoiceEntity
     {
         // Fetch the invoice model with related customer and product lines
         $invoiceModel = InvoiceModel::with('customer', 'productLines')->find($id);
@@ -77,9 +90,9 @@ class InvoiceAdapter
         // Hydrate and return the Invoice entity
         return new InvoiceEntity(
             $customer,
+            StatusEnum::from($invoiceModel->status),
             $productLines,
             $invoiceModel->id,
-            StatusEnum::from($invoiceModel->status),
         );
     }
 
@@ -88,9 +101,9 @@ class InvoiceAdapter
      * @param InvoiceEntity $invoiceEntity
      * @return void
      */
-    public function updateAndPersist(InvoiceEntity $invoiceEntity): void
+    private function updateAndPersist(InvoiceEntity $invoiceEntity): void
     {
-        $invoiceModel = InvoiceModel::updateOrCreate(
+        InvoiceModel::updateOrCreate(
             ['id' => $invoiceEntity->getId()],
             [
                 'status' => $invoiceEntity->getStatus()->value,

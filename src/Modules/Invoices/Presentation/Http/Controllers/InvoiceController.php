@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Invoices\Infrastructure\Controllers;
+namespace Modules\Invoices\Presentation\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -59,7 +59,7 @@ readonly class InvoiceController
     {
         try {
             $id = $request->query('id'); // Retrieve 'id' from query parameters
-            $invoice = $this->invoiceAdapter->fromId($id); // Fetch the invoice by ID
+            $invoice = $this->invoiceAdapter->findById($id); // Fetch the invoice by ID
 
             // If the invoice exists, return the view with the invoice data
             return view('invoices.view', ['invoice' => $invoice]);

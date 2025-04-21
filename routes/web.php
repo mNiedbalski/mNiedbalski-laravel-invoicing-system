@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Invoices\Infrastructure\Controllers\InvoiceController;
+use Modules\Invoices\Presentation\Http\Controllers\InvoiceController;
 
 Route::get('/', [InvoiceController::class, 'showTaskPage'])->name('task-page');
 

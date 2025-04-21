@@ -1,3 +1,17 @@
+:root {
+    --background: #030407;
+    --foreground: #f4f4f5;
+    --primary: #050a17;
+    --primary-hover: #334155;
+    --secondary: #fffff0; /* Ivory */
+    --secondary-hover: #f5f5dc; /* Lighter ivory */
+    --accent: #4f46e5;
+    --accent-hover: #6366f1;
+    --border: #27272a;
+    --shadow: rgba(0, 0, 0, 0.5);
+    --button-text: #000000; /* Black text */
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -6,25 +20,32 @@ body {
     height: 100vh;
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
+    background-color: var(--background);
+    color: var(--foreground);
 }
+
 h1 {
     margin-bottom: 20px;
+    color: var(--foreground);
 }
+
 .container {
     max-width: 800px;
     margin: 0 auto;
-    background: #fff;
+    background: var(--primary);
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px var(--shadow);
+    border: 1px solid var(--border);
 }
+
 .invoice-buttons {
     margin-top: 20px;
     display: flex;
     flex-direction: column;
     width: 400px;
 }
+
 button {
     display: block;
     width: 100%;
@@ -32,12 +53,24 @@ button {
     margin: 10px 0;
     font-size: 16px;
     cursor: pointer;
-    border: none;
+    border: 1px solid var(--border);
     border-radius: 5px;
-    color: white;
-    background-color: #595959;
+    color: var(--button-text);
+    background-color: var(--secondary);
+    transition: background-color 0.3s, border-color 0.3s;
     white-space: nowrap;
 }
+
 button:hover {
-    background-color: #333333;
+    background-color: var(--secondary-hover);
+    border-color: var(--accent);
+}
+
+button.invoice-sent {
+    background-color: var(--accent);
+    color: var(--foreground);
+}
+
+button.invoice-sent:hover {
+    background-color: var(--accent-hover);
 }

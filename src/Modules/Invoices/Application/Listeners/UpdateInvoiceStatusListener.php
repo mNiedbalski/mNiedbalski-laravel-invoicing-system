@@ -16,18 +16,20 @@ class UpdateInvoiceStatusListener implements ShouldQueue
 {
     use InteractsWithQueue;
 
-    public function __construct(private InvoiceAdapter $invoiceAdapter)
+    public function __construct(
+        private readonly InvoiceAdapter $invoiceAdapter
+    )
     {
     }
 
     public function handle(ResourceDeliveredEvent $event): void
     {
         Log::info('Triggered event');
-        $invoice = $this->invoiceAdapter->fromId($event->resourceId);
+        $invoice = $this->invoiceAdapter->findById($event->resourceId);
 
         if ($invoice && $invoice->getStatus() === StatusEnum::Sending) {
             $invoice->markAsSentToClient();
-            $this->invoiceAdapter->updateAndPersist($invoice);
+            $this->invoiceAdapter->update($invoice);
         }
     }
 }

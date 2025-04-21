@@ -12,6 +12,10 @@ use Modules\Notifications\Infrastructure\Drivers\DriverInterface;
 use Modules\Notifications\Infrastructure\Drivers\DummyDriver;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Unfortunately I had troubles with fixing this test due to applied changes to NotificationFacade.
+ * I would be glad to hear if those errors were truly connected with WSL and port mapping or if I'm mistaken and lacked knowledge in this particular case.
+ */
 final class NotificationFacadeTest extends TestCase
 {
     use WithFaker;
@@ -46,7 +50,6 @@ final class NotificationFacadeTest extends TestCase
 
         // I've encountered issues with DriverInterface binding exceptions therefore I changed it to DummyDriver
 //        $this->driver->expects($this->once())->method('send');
-//        $this->notificationFacade->notify($data);
 
         $this->notificationFacade->notify($data);
         $this->assertTrue(true);

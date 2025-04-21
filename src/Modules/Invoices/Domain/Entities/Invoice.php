@@ -2,7 +2,6 @@
 
 namespace Modules\Invoices\Domain\Entities;
 
-use DateTimeImmutable;
 use Modules\Invoices\Domain\Enums\StatusEnum;
 use Modules\Invoices\Domain\ValueObjects\IdService;
 use Modules\Invoices\Domain\ValueObjects\Money;
@@ -38,9 +37,9 @@ class Invoice
      */
     public function __construct(
         Customer   $customer,
+        StatusEnum $status = StatusEnum::Draft,
         array      $productLines = [],
         ?string $id = null,
-        StatusEnum $status = StatusEnum::Draft,
     )
     {
         $this->id = $id ?? IdService::generate();
@@ -64,6 +63,9 @@ class Invoice
      */
     public function markAsSending(): void
     {
+        // Checking if productLines array isn't empty (quantities and prices are already validated in ProductLine constructor)
+        $this->validateProductLines();
+
         if ($this->status !== StatusEnum::Draft) {
             throw new \DomainException('Invoice must be in draft status to be sent.');
         }
@@ -84,14 +86,21 @@ class Invoice
      * @return void
      */
     public function validateProductLines(): void{
-        foreach ($this->productLines as $productLine){
-            if ($productLine->getQuantity() <= 0) {
-                throw new \DomainException('Product line quantity must be greater than zero.');
-            }
-            if ($productLine->getUnitPrice()->getAmount() <= 0) {
-                throw new \DomainException('Product line unit price must be greater than zero.');
-            }
+
+        if (empty($this->productLines)) {
+            throw new \DomainException('Invoice must have at least one product line.');
         }
+
+//         If I misunderstood the conception of ProductLines in the Invoices, meaning that productLines are mutable, then the following lines should be uncommented
+
+//        foreach ($this->productLines as $productLine){
+//            if ($productLine->getQuantity() <= 0) {
+//                throw new \DomainException('Product line quantity must be greater than zero.');
+//            }
+//            if ($productLine->getUnitPrice()->getAmount() <= 0) {
+//                throw new \DomainException('Product line unit price must be greater than zero.');
+//            }
+//        }
     }
 
 
