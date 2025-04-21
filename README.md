@@ -1,23 +1,31 @@
-## mNiedbalski additions:
-### Running project
+# mNiedbalski additions:
 
-In first terminal:
-* `docker compose up -d` <br>
+## Running project
+
+#### Run those in the first terminal:
+* `./start.sh`
 * `docker compose exec app bash` <br>
 * `php artisan queue:work redis` <br>
-In second terminal:
+#### Launch second terminal and type in:
 * `docker compose exec app bash`
 * `php artisan serve` <br>
 
-### Configuration
+#### Database
+To monitor database changes, double-click on the SQLite file in the `storage` folder.
 
-Since I'm working on Windows, I had to change the port in the docker-compose.yml file to 8080. (WSL conflicts with port 8000)
+#### Access page
+
+Enter [127.0.0.1:8080](http://127.0.0.1:8080) in your browser to access the application.
+
+## Project decisions
+### Configuration changes
+
+Since I was working on Windows, I had to change the port in the docker-compose.yml file to 8080. (WSL conflicts with port 8000)
 * `- '${APP_PORT:-8080}:80'` -- Line 12, docker-compose.yml
 
-I've encountered errors connected with storing invoices in memory (it probably doesn't matter at this point because I was trying different approach to data storing).
-Those lines solved the problem:
-`chmod -R guo+w storage`
-`php artisan cache:clear`
+I've encountered errors connected with file permissions for logger so I had to run those commands:
+* `chmod -R guo+w storage`
+* `php artisan cache:clear`
 
 ### Price/Amount/Money representation
 Instead of using integer type for prices, I have decided to introduce a new class called `Money` to handle monetary values.
@@ -50,7 +58,7 @@ Since there are endpoints that may suggest storing invoice data somewhere, I hav
 I have created ORM Eloquent models for data, with mutators and accessors (for example Money class) for the fields that require special handling.
 Finally, I have also added migrations for the database tables because some columns had to be altered or added.
 
-### Ommited functionality
+### Omitted functionality
 
 It wasn't specified whether creating an invoice should be done from form data, therefore I have hardcoded needed values in controller and createInvoice button acts as trigger.
 
@@ -59,6 +67,9 @@ It wasn't specified whether creating an invoice should be done from form data, t
 * There were some errors connected with `DriverInterface` and I decided to use `DummyDriver`. 
 * Another problem was with `NotificationFacade` and url handling -- I had to use http://host.docker.internal:8080 instead of `127.0.0.1:8080`. 
 I suspect it might have been caused by the fact that I was working on Windows and WSL had some conflicts.
+
+# Task description
+
 ## Invoice Structure:
 
 The invoice should contain the following fields:
