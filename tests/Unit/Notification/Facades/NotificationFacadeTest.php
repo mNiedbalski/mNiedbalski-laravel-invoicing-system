@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\Notification\Facades;
 
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Modules\Notifications\Api\Dtos\NotifyData;
 use Modules\Notifications\Application\Facades\NotificationFacade;
-use Modules\Notifications\Infrastructure\Drivers\DriverInterface;
 use Modules\Notifications\Infrastructure\Drivers\DummyDriver;
-use PHPUnit\Framework\TestCase;
+use Illuminate\Foundation\Testing\TestCase;
 
 /**
  * Unfortunately I had troubles with fixing this test due to applied changes to NotificationFacade.
@@ -20,20 +20,18 @@ final class NotificationFacadeTest extends TestCase
 {
     use WithFaker;
 
-    // I've encountered issues with DriverInterface binding exceptions therefore I changed it to DummyDriver
     private DummyDriver $driver;
-//    private DriverInterface $driver;
-
     private NotificationFacade $notificationFacade;
 
-    // I've encountered issues with DriverInterface binding exceptions therefore I changed it to DummyDriver
     protected function setUp(): void
     {
+        parent::setUp();
         $this->setUpFaker();
 
-        // Use an actual instance of DummyDriver
+        // Mock the Http facade
+        Http::fake();
+
         $this->driver = new DummyDriver();
-//        $this->driver = $this->createMock(DriverInterface::class);
         $this->notificationFacade = new NotificationFacade(
             driver: $this->driver,
         );
@@ -48,10 +46,11 @@ final class NotificationFacadeTest extends TestCase
             message: $this->faker->sentence(),
         );
 
-        // I've encountered issues with DriverInterface binding exceptions therefore I changed it to DummyDriver
-//        $this->driver->expects($this->once())->method('send');
-
         $this->notificationFacade->notify($data);
-        $this->assertTrue(true);
+
+        // Assert that the Http::get method was called
+        Http::assertSent(function ($request) use ($data) {
+            return $request->url() === 'http://host.docker.internal:8080/api/notification/hook/delivered/' . $data->resourceId->toString();
+        });
     }
 }
